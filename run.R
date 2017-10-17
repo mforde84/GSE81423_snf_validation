@@ -9,6 +9,7 @@ library(illuminaHumanv4.db)
 library(Matrix)
 library(org.Hs.eg.db)
 
+set.seed(1337)
 thres = 0 
 
 #grab data
@@ -52,7 +53,7 @@ data.dup2 <- lapply(ezid.dup, function(x) {
 	}
 })
 
-#merged data for CV estimate
+#unique dataset
 merger <- data.frame(do.call(rbind, data.dup2))
 rownames(merger) <- merger$ensembl
 merger$ensembl = NULL
@@ -83,10 +84,9 @@ test.set <- apply(test.set, 1, function(x) rescale(x, to = c(-1, 1)))
 ## of the probe on the microarray platform
 test.set <- apply(test.set, 2, function(x) ifelse(is.na(x), as.numeric(-1), as.numeric(x)))
 
-# scale
 ## run prediction
 prediction <- as.character(pamr.predict(dat.train, t(test.set), threshold = thres))
-pred <- cbind(sampleID = rownames(test.set), predicted_label = prediction )
+pred <- cbind(sampleID = rownames(test.set), predicted_label = prediction)
 ## obtain prediction probability for each testing sample
 prob <- pamr.predict(dat.train, t(test.set), type = 'posterior', threshold = thres)
 
